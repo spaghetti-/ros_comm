@@ -144,7 +144,7 @@ def get_machines_by_nodes():
     """
     Find machines connected to nodes. This is a very costly procedure as it
     must do N lookups with the Master, where N is the number of nodes.
-    
+
     @return: list of machines connected
     @rtype: [str]
     @raise ROSNodeIOException: if unable to communicate with master
@@ -165,7 +165,7 @@ def get_machines_by_nodes():
                 machines.append(h)
 
         except socket.error:
-            raise ROSNodeIOException("Unable to communicate with master!")    
+            raise ROSNodeIOException("Unable to communicate with master!")
         except rosgraph.MasterError:
             # it's possible that the state changes as we are doing lookups. this is a soft-fail
             continue
@@ -176,14 +176,14 @@ def get_nodes_by_machine(machine):
     """
     Find nodes by machine name. This is a very costly procedure as it
     must do N lookups with the Master, where N is the number of nodes.
-    
+
     @return: list of nodes on the specified machine
     @rtype: [str]
     @raise ROSNodeException: if machine name cannot be resolved to an address
     @raise ROSNodeIOException: if unable to communicate with master
     """
     import urlparse
-    
+
     master = rosgraph.Master(ID)
     try:
         machine_actual = [host[4][0] for host in socket.getaddrinfo(machine, 0, 0, 0, socket.SOL_TCP)]
@@ -216,9 +216,9 @@ def get_nodes_by_machine(machine):
                     matches.append(r)
                     retval.append(n)
                 else:
-                    not_matches.append(r)                        
+                    not_matches.append(r)
         except socket.error:
-            raise ROSNodeIOException("Unable to communicate with master!")    
+            raise ROSNodeIOException("Unable to communicate with master!")
     return retval
 
 def kill_nodes(node_names):
@@ -229,7 +229,7 @@ def kill_nodes(node_names):
     @rtype: ([str], [str])
     """
     master = rosgraph.Master(ID)
-    
+
     success = []
     fail = []
     tocall = []
@@ -252,17 +252,17 @@ def kill_nodes(node_names):
             _succeed(p.shutdown(ID, 'user request'))
         except:
             pass
-        success.append(n)            
+        success.append(n)
 
     return success, fail
 
 def _sub_rosnode_listnodes(namespace=None, list_uri=False, list_all=False):
     """
     Subroutine for rosnode_listnodes(). Composes list of strings to print to screen.
-    
-    @param namespace: (default None) namespace to scope list to. 
+
+    @param namespace: (default None) namespace to scope list to.
     @type  namespace: str
-    @param list_uri: (default False) return uris of nodes instead of names. 
+    @param list_uri: (default False) return uris of nodes instead of names.
     @type  list_uri: bool
     @param list_all: (default False) return names and uris of nodes as combined strings
     @type  list_all: bool
@@ -278,7 +278,7 @@ def _sub_rosnode_listnodes(namespace=None, list_uri=False, list_all=False):
         return '\n'.join([(get_api_uri(master, n) or 'unknown address') for n in nodes])
     else:
         return '\n'.join(nodes)
-    
+
 def rosnode_listnodes(namespace=None, list_uri=False, list_all=False):
     """
     Print list of all ROS nodes to screen.
@@ -288,10 +288,10 @@ def rosnode_listnodes(namespace=None, list_uri=False, list_all=False):
     @param list_uri: print uris of nodes instead of names
     @type  list_uri: bool
     @param list_all: print node names and uris
-    @param list_all: bool    
+    @param list_all: bool
     """
     print(_sub_rosnode_listnodes(namespace=namespace, list_uri=list_uri, list_all=list_all))
-    
+
 def rosnode_ping(node_name, max_count=None, verbose=False):
     """
     Test connectivity to node by calling its XMLRPC API
@@ -365,7 +365,7 @@ def rosnode_ping(node_name, max_count=None, verbose=False):
             time.sleep(1.0)
     except KeyboardInterrupt:
         pass
-            
+
     if verbose and count > 1:
         print("ping average: %fms"%(acc/count))
     return True
@@ -397,10 +397,10 @@ def rosnode_ping_all(verbose=False):
         else:
             unpinged.append(node)
     return pinged, unpinged
-    
+
 def cleanup_master_blacklist(master, blacklist):
     """
-    Remove registrations from ROS Master that do not match blacklist.    
+    Remove registrations from ROS Master that do not match blacklist.
     @param master: XMLRPC handle to ROS Master
     @type  master: xmlrpclib.ServerProxy
     @param blacklist: list of nodes to scrub
@@ -443,7 +443,7 @@ def cleanup_master_whitelist(master, whitelist):
         for n in l:
             if n not in whitelist:
                 node_api = get_api_uri(master, n)
-                master_n = rosgraph.Master(n)                
+                master_n = rosgraph.Master(n)
                 master_n.unregisterSubscriber(t, node_api)
     for s, l in srvs:
         for n in l:
@@ -472,7 +472,7 @@ def rosnode_cleanup():
         if input.strip() == 'n':
             print('aborting')
             return
-        
+
         cleanup_master_blacklist(master, unpinged)
 
         print("done")
@@ -494,7 +494,7 @@ def get_node_info_description(node_name):
         raise ROSNodeIOException("Unable to communicate with master!")
     pubs = [t for t, l in state[0] if node_name in l]
     subs = [t for t, l in state[1] if node_name in l]
-    srvs = [t for t, l in state[2] if node_name in l]  
+    srvs = [t for t, l in state[2] if node_name in l]
 
     buff = "Node [%s]"%node_name
     if pubs:
@@ -506,13 +506,13 @@ def get_node_info_description(node_name):
         buff += "\nSubscriptions: \n"
         buff += '\n'.join([" * %s [%s]"%(l, topic_type(l, pub_topics)) for l in subs]) + '\n'
     else:
-        buff += "\nSubscriptions: None\n"        
+        buff += "\nSubscriptions: None\n"
     if srvs:
         buff += "\nServices: \n"
         buff += '\n'.join([" * %s"%l for l in srvs]) + '\n'
     else:
         buff += "\nServices: None\n"
-        
+
     return buff
 
 def get_node_connection_info_description(node_api, master):
@@ -557,7 +557,7 @@ def get_node_connection_info_description(node_api, master):
 def rosnode_info(node_name, non_verbose):
     """
     Print information about node, including subscriptions and other debugging information. This will query the node over the network.
-    
+
     @param node_name: name of ROS node
     @type  node_name: str
     @raise ROSNodeIOException: if unable to communicate with master
@@ -573,7 +573,7 @@ def rosnode_info(node_name, non_verbose):
 
     print('-'*80)
     print(get_node_info_description(node_name))
-        
+
     node_api = get_api_uri(master, node_name)
     if not node_api:
         print("cannot contact [%s]: unknown node"%node_name, file=sys.stderr)
@@ -621,7 +621,7 @@ def _rosnode_cmd_info(argv):
                       help="non-verbose mode")
     (options, args) = parser.parse_args(args)
     if not args:
-        parser.error("You must specify at least one node name")        
+        parser.error("You must specify at least one node name")
     for node in args:
         rosnode_info(node, options.non_verbose)
 
@@ -670,14 +670,14 @@ def _rosnode_cmd_kill(argv):
         if not node_list:
             print("No nodes running", file=sys.stderr)
             return 0
-        
+
         sys.stdout.write('\n'.join(["%s. %s"%(i+1, n) for i,n in enumerate(node_list)]))
         sys.stdout.write("\n\nPlease enter the number of the node you wish to kill.\n> ")
         selection = ''
         while not selection:
             selection = sys.stdin.readline().strip()
             try:
-                selection = int(selection) 
+                selection = int(selection)
                 if selection <= 0:
                     print("ERROR: invalid selection. Please enter a number (ctrl-C to cancel)")
             except:
@@ -696,14 +696,14 @@ def _rosnode_cmd_kill(argv):
         print("killing:\n"+'\n'.join([" * %s"%n for n in args]))
     else:
         print("killing %s"%(args[0]))
-            
+
     success, fail = kill_nodes(args)
     if fail:
         print("ERROR: Failed to kill:\n"+'\n'.join([" * %s"%n for n in fail]), file=sys.stderr)
         return 1
     print("killed")
     return 0
-        
+
 def _rosnode_cmd_cleanup(argv):
     """
     Implements rosnode 'cleanup' command.
@@ -721,7 +721,7 @@ def _rosnode_cmd_ping(argv):
     @param argv: command-line args
     @type  argv: [str]
     """
-    args = argv[2:]    
+    args = argv[2:]
     parser = OptionParser(usage="usage: %prog ping [options] <node>", prog=NAME)
     parser.add_option("--all", "-a",
                       dest="ping_all", default=False,
@@ -750,12 +750,12 @@ def _rosnode_cmd_ping(argv):
             parser.error("Invalid arguments '%s' used with --all"%(' '.join(args)))
         elif options.ping_count:
             parser.error("-c may not be used with --all")
-            
+
     if options.ping_all:
         rosnode_ping_all(verbose=True)
     else:
         rosnode_ping(node_name, verbose=True, max_count=options.ping_count)
-    
+
 def _fullusage(return_error=True):
     """
     Prints rosnode usage information.
